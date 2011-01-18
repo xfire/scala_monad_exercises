@@ -39,15 +39,17 @@ object Monad {
 }
  
 object MonadicFunctions {
-  def sequence[M[_], A](as: List[M[A]], m: Monad[M]): M[List[A]] = {
+  def sequence[M[_], A](as: List[M[A]], m: Monad[M]): M[List[A]] =
     as.foldRight(m.unital(List[A]()))((v, acc) => m.flatMap(v, (x: A) => m.flatMap(acc, (y: List[A]) => m.unital(x :: y))))
-  }
  
-  def fmap[M[_], A, B](a: M[A], f: A => B, m: Monad[M]): M[B] = m.flatMap(a, (x: A) => m.unital(f(x)))
+  def fmap[M[_], A, B](a: M[A], f: A => B, m: Monad[M]): M[B] =
+    m.flatMap(a, (x: A) => m.unital(f(x)))
  
-  def flatten[M[_], A](a: M[M[A]], m: Monad[M]): M[A] = m.flatMap(a, (x: M[A]) => x)
+  def flatten[M[_], A](a: M[M[A]], m: Monad[M]): M[A] =
+    m.flatMap(a, (x: M[A]) => x)
  
-  def apply[M[_], A, B](f: M[A => B], a: M[A], m: Monad[M]): M[B] = error("todo")
+  def apply[M[_], A, B](f: M[A => B], a: M[A], m: Monad[M]): M[B] =
+    m.flatMap(f, (ff: A => B) => m.flatMap(a, (x: A) => m.unital(ff(x))))
  
   def filterM[M[_], A](f: A => M[Boolean], as: List[A], m: Monad[M]): M[List[A]] = error("todo")
  
