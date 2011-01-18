@@ -43,21 +43,16 @@ object MonadicFunctions {
     as.foldRight(m.unital(List[A]()))((v, acc) => m.flatMap(v, (x: A) => m.flatMap(acc, (y: List[A]) => m.unital(x :: y))))
   }
  
-  def fmap[M[_], A, B](a: M[A], f: A => B, m: Monad[M]): M[B] = m.flatMap(a, ((x: A) => m.unital(f(x))))
+  def fmap[M[_], A, B](a: M[A], f: A => B, m: Monad[M]): M[B] = m.flatMap(a, (x: A) => m.unital(f(x)))
  
-  // 8. Replace error("todo") with an implementation
-  def flatten[M[_], A](a: M[M[A]], m: Monad[M]): M[A] = error("todo")
+  def flatten[M[_], A](a: M[M[A]], m: Monad[M]): M[A] = m.flatMap(a, (x: M[A]) => x)
  
-  // 9. Replace error("todo") with an implementation
   def apply[M[_], A, B](f: M[A => B], a: M[A], m: Monad[M]): M[B] = error("todo")
  
-  // 10. Replace error("todo") with an implementation
   def filterM[M[_], A](f: A => M[Boolean], as: List[A], m: Monad[M]): M[List[A]] = error("todo")
  
-  // 11. Replace error("todo") with an implementation
   def replicateM[M[_], A](n: Int, a: M[A], m: Monad[M]): M[List[A]] = error("todo: flatMap n times to produce a list")
  
-  // 12. Replace error("todo") with an implementation
   def lift2[M[_], A, B, C](f: (A, B) => C, a: M[A], b: M[B], m: Monad[M]): M[C] = error("todo")
  
   // lift3, lift4, etc. Interesting question: Can we have liftN?
