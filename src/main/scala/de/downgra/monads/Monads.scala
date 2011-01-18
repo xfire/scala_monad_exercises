@@ -40,7 +40,10 @@ object Monad {
  
 object MonadicFunctions {
   def sequence[M[_], A](as: List[M[A]], m: Monad[M]): M[List[A]] =
-    as.foldRight(m.unital(List[A]()))((v, acc) => m.flatMap(v, (x: A) => m.flatMap(acc, (y: List[A]) => m.unital(x :: y))))
+    as.foldRight(m.unital(List[A]()))((v, acc) =>
+      m.flatMap(v, (x: A) =>
+        m.flatMap(acc, (ys: List[A]) =>
+          m.unital(x :: ys))))
  
   def fmap[M[_], A, B](a: M[A], f: A => B, m: Monad[M]): M[B] =
     m.flatMap(a, (x: A) => m.unital(f(x)))
@@ -51,7 +54,13 @@ object MonadicFunctions {
   def apply[M[_], A, B](f: M[A => B], a: M[A], m: Monad[M]): M[B] =
     m.flatMap(f, (ff: A => B) => m.flatMap(a, (x: A) => m.unital(ff(x))))
  
-  def filterM[M[_], A](f: A => M[Boolean], as: List[A], m: Monad[M]): M[List[A]] = error("todo")
+  def filterM[M[_], A](f: A => M[Boolean], as: List[A], m: Monad[M]): M[List[A]] = as match {
+    case x :: xs =>
+      m.flatMap(f(x), (p: Boolean) => 
+        m.flatMap(filterM(f, xs, m), (ys: List[A]) =>
+          m.unital(if(p) x :: ys else ys)))
+    case Nil => m.unital(List[A]())
+  }
  
   def replicateM[M[_], A](n: Int, a: M[A], m: Monad[M]): M[List[A]] = error("todo: flatMap n times to produce a list")
  
