@@ -17,20 +17,20 @@ class MonadSpec extends FunSuite with ShouldMatchers {
   // sequence --------------------------------
 
   test("sequence on ListMonad") {
-    sequence(List(List(1, 2), List(3, 4)), ListMonad) should be (List(List(1, 3), List(1, 4), List(2, 3), List(2, 4)))
+    sequenceM(List(List(1, 2), List(3, 4)), ListMonad) should be (List(List(1, 3), List(1, 4), List(2, 3), List(2, 4)))
   }
 
   test("sequence on OptionMonad") {
-    sequence(List(Some(7), Some(8), Some(9)), OptionMonad) should be (Some(List(7, 8, 9)))
-    sequence(List(Some(7), None, Some(9)), OptionMonad) should be (None)
+    sequenceM(List(Some(7), Some(8), Some(9)), OptionMonad) should be (Some(List(7, 8, 9)))
+    sequenceM(List(Some(7), None, Some(9)), OptionMonad) should be (None)
   }
 
   test("sequence on InterMonad") {
-    (sequence(List(plusOne, multTwo, squared), InterMonad) f 7) should be (List(8, 14, 49))
+    (sequenceM(List(plusOne, multTwo, squared), InterMonad) f 7) should be (List(8, 14, 49))
   }
 
   test("sequence on IdentityMonad") {
-    sequence(List(Identity(7), Identity(4)), IdentityMonad) should be (Identity(List(7, 4)))
+    sequenceM(List(Identity(7), Identity(4)), IdentityMonad) should be (Identity(List(7, 4)))
   }
 
   // fmap --------------------------------
@@ -55,43 +55,43 @@ class MonadSpec extends FunSuite with ShouldMatchers {
   // flatten --------------------------------
 
   test("flatten on ListMonad") {
-   flatten(List(List(1, 2), List(3, 4)), ListMonad) should be (List(1, 2, 3, 4))
+   flattenM(List(List(1, 2), List(3, 4)), ListMonad) should be (List(1, 2, 3, 4))
   }
 
   test("flatten on OptionMonad") {
-   flatten(Some(Some(8)), OptionMonad) should be (Some(8))
-   flatten(Some(None: Option[Int]), OptionMonad) should be (None)
-   flatten(None: Option[Option[Int]], OptionMonad) should be (None)
+   flattenM(Some(Some(8)), OptionMonad) should be (Some(8))
+   flattenM(Some(None: Option[Int]), OptionMonad) should be (None)
+   flattenM(None: Option[Option[Int]], OptionMonad) should be (None)
   }
 
   test("flatten on InterMonad") {
-   (flatten(Inter(a => Inter(a *)), InterMonad) f 7) should be (49)
+   (flattenM(Inter(a => Inter(a *)), InterMonad) f 7) should be (49)
   }
 
   test("flatten on IdentityMonad") {
-   flatten(Identity(Identity(8)), IdentityMonad) should be (Identity(8))
+   flattenM(Identity(Identity(8)), IdentityMonad) should be (Identity(8))
   }
 
   // apply --------------------------------
 
   test("apply on ListMonad") {
-     apply(List((a: Int) => a + 1,
-                (a: Int) => a * 2,
-                (a: Int) => a % 2), List(1, 2, 3), ListMonad) should be (List(2, 3, 4, 2, 4, 6, 1, 0, 1))
+     applyM(List((a: Int) => a + 1,
+                 (a: Int) => a * 2,
+                 (a: Int) => a % 2), List(1, 2, 3), ListMonad) should be (List(2, 3, 4, 2, 4, 6, 1, 0, 1))
   }
 
   test("apply on OptionMonad") {
-   apply(Some((a: Int) => a + 1), Some(8), OptionMonad) should be (Some(9))
-   apply(None: Option[Int => Int], Some(8), OptionMonad) should be (None)
-   apply(Some((a: Int) => a + 1), None: Option[Int], OptionMonad) should be (None)
+   applyM(Some((a: Int) => a + 1), Some(8), OptionMonad) should be (Some(9))
+   applyM(None: Option[Int => Int], Some(8), OptionMonad) should be (None)
+   applyM(Some((a: Int) => a + 1), None: Option[Int], OptionMonad) should be (None)
   }
 
   test("apply on InterMonad") {
-   (apply(Inter(a => (b: Int) => a * b), Inter(1+), InterMonad) f 7) should be (56)
+   (applyM(Inter(a => (b: Int) => a * b), Inter(1+), InterMonad) f 7) should be (56)
   }
 
   test("apply on IdentityMonad") {
-   apply(Identity((a: Int) => a + 1), Identity(7), IdentityMonad) should be (Identity(8))
+   applyM(Identity((a: Int) => a + 1), Identity(7), IdentityMonad) should be (Identity(8))
   }
 
   // filterM --------------------------------
@@ -135,32 +135,32 @@ class MonadSpec extends FunSuite with ShouldMatchers {
   // lift2 --------------------------------
 
   test("lift2 on ListMonad") {
-   lift2(plus, List(1, 2), List(3, 4), ListMonad) should be (List(4, 5, 5, 6))
+   liftM2(plus, List(1, 2), List(3, 4), ListMonad) should be (List(4, 5, 5, 6))
   }
 
   test("lift2 on OptionMonad") {
-   lift2(plus, Some(7), Some(8), OptionMonad) should be (Some(15))
-   lift2(plus, Some(7), None: Option[Int], OptionMonad) should be (None)
-   lift2(plus, None: Option[Int], Some(8), OptionMonad) should be (None)
+   liftM2(plus, Some(7), Some(8), OptionMonad) should be (Some(15))
+   liftM2(plus, Some(7), None: Option[Int], OptionMonad) should be (None)
+   liftM2(plus, None: Option[Int], Some(8), OptionMonad) should be (None)
   }
 
   // lift3 --------------------------------
 
   test("lift3 on ListMonad") {
-    lift3(plus3, List(1, 2), List(3, 4), List(5, 6), ListMonad) should be (List(9, 10, 10, 11, 10, 11, 11, 12))
+    liftM3(plus3, List(1, 2), List(3, 4), List(5, 6), ListMonad) should be (List(9, 10, 10, 11, 10, 11, 11, 12))
   }
 
   test("lift3 on OptionMonad") {
-   lift3(plus3, Some(7), Some(8), Some(9), OptionMonad) should be (Some(24))
-   lift3(plus3, None: Option[Int], Some(8), Some(9), OptionMonad) should be (None)
-   lift3(plus3, Some(7), None: Option[Int], Some(9), OptionMonad) should be (None)
-   lift3(plus3, Some(7), Some(8), None: Option[Int], OptionMonad) should be (None)
+   liftM3(plus3, Some(7), Some(8), Some(9), OptionMonad) should be (Some(24))
+   liftM3(plus3, None: Option[Int], Some(8), Some(9), OptionMonad) should be (None)
+   liftM3(plus3, Some(7), None: Option[Int], Some(9), OptionMonad) should be (None)
+   liftM3(plus3, Some(7), Some(8), None: Option[Int], OptionMonad) should be (None)
   }
 
   // fold ----------------------------------
 
   test("fold on ListMonad") {
-    fold((acc: Int, v: Int) => List(v + acc), 0, List(1, 2, 3, 4, 5), ListMonad) should be (List(15))
+    foldM((acc: Int, v: Int) => List(v + acc), 0, List(1, 2, 3, 4, 5), ListMonad) should be (List(15))
   }
 
   test("fold on OptionMonad") {
@@ -168,18 +168,18 @@ class MonadSpec extends FunSuite with ShouldMatchers {
       case 0 => None
       case _ => Some(a / b)
     }
-    fold(-/-, 1.0, List(1, 2), OptionMonad) should be (Some(0.5))
-    fold(-/-, 1.0, List(1, 0, 2), OptionMonad) should be (None)
+    foldM(-/-, 1.0, List(1, 2), OptionMonad) should be (Some(0.5))
+    foldM(-/-, 1.0, List(1, 0, 2), OptionMonad) should be (None)
   }
 
   test("fold on InterMonad") {
     val w = (a: List[Int], b: Int) => Inter((p: Int) => if(p >= b) b :: a else a) 
-    (fold(w, List(), List(1,2,3,4), InterMonad) f 2) should be (List(2, 1))
-    (fold(w, List(), List(1,2,3,4), InterMonad) f 4) should be (List(4, 3, 2, 1))
+    (foldM(w, List(), List(1,2,3,4), InterMonad) f 2) should be (List(2, 1))
+    (foldM(w, List(), List(1,2,3,4), InterMonad) f 4) should be (List(4, 3, 2, 1))
   }
 
   test("fold on IdentityMonad") {
-    fold((acc: Int, v: Int) => Identity(acc + v), 0, List(1, 2, 3, 4, 5), IdentityMonad) should be (Identity(15))
+    foldM((acc: Int, v: Int) => Identity(acc + v), 0, List(1, 2, 3, 4, 5), IdentityMonad) should be (Identity(15))
   }
 
 }

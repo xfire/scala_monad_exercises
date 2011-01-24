@@ -14,6 +14,7 @@ case class Identity[A](a: A)
  
 // Monad implementations
 object Monad {
+
   def ListMonad: Monad[List] = new Monad[List] {
     def flatMap[A, B](a: List[A], f: A => List[B]): List[B] = a.foldLeft(List[B]())((acc, v) => acc ++ f(v))
     def unital[A](a: A): List[A] = List(a)
@@ -36,10 +37,12 @@ object Monad {
     def flatMap[A, B](a: Identity[A], f: A => Identity[B]): Identity[B] = f(a.a)
     def unital[A](a: A): Identity[A] = Identity(a)
   }
+
 }
  
 object MonadicFunctions {
-  def sequence[M[_], A](as: List[M[A]], m: Monad[M]): M[List[A]] =
+
+  def sequenceM[M[_], A](as: List[M[A]], m: Monad[M]): M[List[A]] =
     as.foldRight(m.unital(List[A]()))(
       (v, acc) => m.flatMap(v,
         (x: A) => m.flatMap(acc,
@@ -48,10 +51,10 @@ object MonadicFunctions {
   def fmap[M[_], A, B](a: M[A], f: A => B, m: Monad[M]): M[B] =
     m.flatMap(a, (x: A) => m.unital(f(x)))
  
-  def flatten[M[_], A](a: M[M[A]], m: Monad[M]): M[A] =
+  def flattenM[M[_], A](a: M[M[A]], m: Monad[M]): M[A] =
     m.flatMap(a, (x: M[A]) => x)
  
-  def apply[M[_], A, B](f: M[A => B], a: M[A], m: Monad[M]): M[B] =
+  def applyM[M[_], A, B](f: M[A => B], a: M[A], m: Monad[M]): M[B] =
     m.flatMap(f,
       (ff: A => B) => m.flatMap(a,
         (x: A) => m.unital(ff(x))))
@@ -72,21 +75,22 @@ object MonadicFunctions {
           (xs: List[A]) => m.unital(v :: xs)))
   }
  
-  def lift2[M[_], A, B, C](f: (A, B) => C, a: M[A], b: M[B], m: Monad[M]): M[C] =
+  def liftM2[M[_], A, B, C](f: (A, B) => C, a: M[A], b: M[B], m: Monad[M]): M[C] =
     m.flatMap(a,
       (x: A) => m.flatMap(b,
         (y: B) => m.unital(f(x, y))))
  
-  def lift3[M[_], A, B, C, D](f: (A, B, C) => D, a: M[A], b: M[B], c: M[C], m: Monad[M]): M[D] =
+  def liftM3[M[_], A, B, C, D](f: (A, B, C) => D, a: M[A], b: M[B], c: M[C], m: Monad[M]): M[D] =
     m.flatMap(a,
       (x: A) => m.flatMap(b,
         (y: B) => m.flatMap(c,
           (z: C) => m.unital(f(x, y, z)))))
 
-  def fold[M[_], A, B](f: (A, B) => M[A], a: A, xs: List[B], m: Monad[M]): M[A] =
+  def foldM[M[_], A, B](f: (A, B) => M[A], a: A, xs: List[B], m: Monad[M]): M[A] =
     xs.foldLeft(m.unital(a))((acc: M[A], v: B) =>
       m.flatMap(acc,
         (x: A) => f(x, v)))
+
 }
  
 // vim: set ts=2 sw=2 et:
