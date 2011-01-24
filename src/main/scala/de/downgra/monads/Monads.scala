@@ -77,7 +77,16 @@ object MonadicFunctions {
       (x: A) => m.flatMap(b,
         (y: B) => m.unital(f(x, y))))
  
-  // lift3, lift4, etc. Interesting question: Can we have liftN?
+  def lift3[M[_], A, B, C, D](f: (A, B, C) => D, a: M[A], b: M[B], c: M[C], m: Monad[M]): M[D] =
+    m.flatMap(a,
+      (x: A) => m.flatMap(b,
+        (y: B) => m.flatMap(c,
+          (z: C) => m.unital(f(x, y, z)))))
+
+  def fold[M[_], A, B](f: (A, B) => M[A], a: A, xs: List[B], m: Monad[M]): M[A] =
+    xs.foldLeft(m.unital(a))((acc: M[A], v: B) =>
+      m.flatMap(acc,
+        (x: A) => f(x, v)))
 }
  
 // vim: set ts=2 sw=2 et:

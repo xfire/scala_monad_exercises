@@ -12,6 +12,7 @@ class MonadSpec extends FunSuite with ShouldMatchers {
   val multTwo = Inter(2*)
   val squared = Inter(n => n*n)
   val plus = (_: Int) + (_: Int)
+  val plus3 = (_: Int) + (_: Int) + (_: Int)
 
   // sequence --------------------------------
 
@@ -141,6 +142,44 @@ class MonadSpec extends FunSuite with ShouldMatchers {
    lift2(plus, Some(7), Some(8), OptionMonad) should be (Some(15))
    lift2(plus, Some(7), None: Option[Int], OptionMonad) should be (None)
    lift2(plus, None: Option[Int], Some(8), OptionMonad) should be (None)
+  }
+
+  // lift3 --------------------------------
+
+  test("lift3 on ListMonad") {
+    lift3(plus3, List(1, 2), List(3, 4), List(5, 6), ListMonad) should be (List(9, 10, 10, 11, 10, 11, 11, 12))
+  }
+
+  test("lift3 on OptionMonad") {
+   lift3(plus3, Some(7), Some(8), Some(9), OptionMonad) should be (Some(24))
+   lift3(plus3, None: Option[Int], Some(8), Some(9), OptionMonad) should be (None)
+   lift3(plus3, Some(7), None: Option[Int], Some(9), OptionMonad) should be (None)
+   lift3(plus3, Some(7), Some(8), None: Option[Int], OptionMonad) should be (None)
+  }
+
+  // fold ----------------------------------
+
+  test("fold on ListMonad") {
+    fold((acc: Int, v: Int) => List(v + acc), 0, List(1, 2, 3, 4, 5), ListMonad) should be (List(15))
+  }
+
+  test("fold on OptionMonad") {
+    val -/- = (a: Double, b: Int) => b match {
+      case 0 => None
+      case _ => Some(a / b)
+    }
+    fold(-/-, 1.0, List(1, 2), OptionMonad) should be (Some(0.5))
+    fold(-/-, 1.0, List(1, 0, 2), OptionMonad) should be (None)
+  }
+
+  test("fold on InterMonad") {
+    val w = (a: List[Int], b: Int) => Inter((p: Int) => if(p >= b) b :: a else a) 
+    (fold(w, List(), List(1,2,3,4), InterMonad) f 2) should be (List(2, 1))
+    (fold(w, List(), List(1,2,3,4), InterMonad) f 4) should be (List(4, 3, 2, 1))
+  }
+
+  test("fold on IdentityMonad") {
+    fold((acc: Int, v: Int) => Identity(acc + v), 0, List(1, 2, 3, 4, 5), IdentityMonad) should be (Identity(15))
   }
 
 }
