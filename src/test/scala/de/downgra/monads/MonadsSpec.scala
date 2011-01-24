@@ -202,6 +202,25 @@ class MonadSpec extends FunSuite with ShouldMatchers {
     mapM((x: Int) => Identity(x > 1), List(1, 2, 3), IdentityMonad) should be (Identity(List(false, true, true)))
   }
 
+  // zipWithM ----------------------------------
+
+  test("zipWithM on ListMonad") {
+    zipWithM((a: Int, b: Int) => List(a + b), List(1, 2, 3), List(4, 5, 6), ListMonad) should be (List(List(5, 7, 9)))
+  }
+
+  test("zipWithM on OptionMonad") {
+    zipWithM((a: Int, b: Int) => Some(a + b), List(1, 2, 3), List(4, 5, 6), OptionMonad) should be (Some(List(5, 7, 9)))
+    zipWithM((a: Int, b: Int) => if(a % 2 == 0) Some(a + b) else None, List(1, 2, 3), List(4, 5, 6), OptionMonad) should be (None)
+  }
+
+  test("zipWithM on InterMonad") {
+    (zipWithM((a: Int, b: Int) => Inter(p => if(p > 0) a else b), List(1, 2, 3), List(4, 5, 6), InterMonad) f 0) should be (List(4, 5, 6))
+    (zipWithM((a: Int, b: Int) => Inter(p => if(p > 0) a else b), List(1, 2, 3), List(4, 5, 6), InterMonad) f 42) should be (List(1, 2, 3))
+  }
+
+  test("zipWithM on IdentityMonad") {
+    zipWithM((a: Int, b: Int) => Identity(a < b), List(1, 5, 3), List(4, 2, 6), IdentityMonad) should be (Identity(List(true, false, true)))
+  }
 
 }
 

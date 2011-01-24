@@ -93,6 +93,9 @@ object MonadicFunctions {
 
   def mapM[M[_], A, B](f: A => M[B], xs: List[A], m: Monad[M]): M[List[B]] =
     sequenceM(xs map f, m)
+
+  def zipWithM[M[_], A, B, C](f: (A, B) => M[C], as: List[A], bs: List[B], m: Monad[M]): M[List[C]] =
+    sequenceM((as zip bs) map f.tupled, m)
 }
  
 // vim: set ts=2 sw=2 et:
