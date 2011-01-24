@@ -91,6 +91,8 @@ object MonadicFunctions {
       m.flatMap(acc,
         (x: A) => f(x, v)))
 
+  def mapM[M[_], A, B](f: A => M[B], xs: List[A], m: Monad[M]): M[List[B]] =
+    sequenceM(xs map f, m)
 }
  
 // vim: set ts=2 sw=2 et:

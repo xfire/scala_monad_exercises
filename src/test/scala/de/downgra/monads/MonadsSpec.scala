@@ -182,6 +182,27 @@ class MonadSpec extends FunSuite with ShouldMatchers {
     foldM((acc: Int, v: Int) => Identity(acc + v), 0, List(1, 2, 3, 4, 5), IdentityMonad) should be (Identity(15))
   }
 
+  // mapM ----------------------------------
+
+  test("mapM on ListMonad") {
+    mapM((x: Int) => List(x), List(1, 2, 3), ListMonad) should be (List(List(1, 2, 3)))
+  }
+
+  test("mapM on OptionMonad") {
+    mapM((x: Int) => Some(x), List(0, 1, 2), OptionMonad) should be (Some(List(0, 1, 2)))
+    mapM((x: Int) => if(x % 2 == 0) Some(x) else None, List(0, 2, 4, 5), OptionMonad) should be (None)
+  }
+
+  test("mapM on InterMonad") {
+    (mapM((x: Int) => Inter(y => x < y), List(1, 2, 3, 4, 5), InterMonad) f 3) should be (List(true, true, false, false, false))
+    (mapM((x: Int) => Inter(x + _), List(3, 4, 5), InterMonad) f 3) should be (List(6, 7, 8))
+  }
+
+  test("mapM on IdentityMonad") {
+    mapM((x: Int) => Identity(x > 1), List(1, 2, 3), IdentityMonad) should be (Identity(List(false, true, true)))
+  }
+
+
 }
 
 // vim: set ts=2 sw=2 et:
